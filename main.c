@@ -1,12 +1,10 @@
-#include <stdio.h>
-#include <unistd.h>
 #include <ncurses.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
 
-#define MAX_WIDTH 50
-#define MAX_HEIGHT 50
+#define MAX_WIDTH 11
+#define MAX_HEIGHT 11
 #define INIT_LEN 4
 
 typedef struct {
@@ -22,8 +20,8 @@ typedef enum {
 } direction;
 
 typedef struct {
-    point* start;
-    point* end;
+    point* head;
+    int length;
     direction dir;
 } segment;
 
@@ -50,24 +48,15 @@ void flog(const char *fmt, ...) {
     fclose(fp);
 }
 
-void put_char_at(int x, int y, char c) {
-    // move(y, x);
-    // addch(c);
-    mvaddch(y, x, c);
-
-    // refresh();
-}
-
-
 void draw_horizontal_line(int y, int len, char c) {
     for (int x = 0; x < len; x++) {
-        put_char_at(x, y, c);
+        mvaddch(y, x, c);
     }
 }
 
 void draw_vertical_line(int x, int len, char c) {
     for (int y = 0; y < len; y++) {
-        put_char_at(x, y, c);
+        mvaddch(y, x, c);
     }
 }
 
@@ -77,10 +66,29 @@ void draw_field(int size_x, int size_y) {
     draw_horizontal_line(size_y - 1, size_x, '$');
     draw_vertical_line(0, size_y, '$');
     draw_vertical_line(size_x - 1, size_y, '$');
-    refresh();
 }
 
-segment* init_game() {
+void draw_segment(segment* seg) {
+    if (seg->dir == UP) {
+        for (int dy = 0; dy < seg->length; dy++) {
+            mvaddch(seg->head->y + dy, seg->head->x, '0');
+        }
+    } else if (seg->dir == DOWN) {
+        for (int dy = 0; dy < seg->length; dy++) {
+            mvaddch(seg->head->y - dy, seg->head->x, '0');
+        }
+    } else if (seg->dir == RIGHT) {
+        for (int dx = 0; dx < seg->length; dx++) {
+            mvaddch(seg->head->y, seg->head->x - dx, '0');
+        }
+    } else if (seg->dir == LEFT) {
+        for (int dx = 0; dx < seg->length; dx++) {
+            mvaddch(seg->head->y, seg->head->x + dx, '0');
+        }
+    }
+}
+
+void init_game() {
     int max_y, max_x;
     getmaxyx(stdscr, max_y, max_x);
 
@@ -93,7 +101,9 @@ segment* init_game() {
     int start_x = size_x / 2;
     int start_y = size_y / 2;
 
-    segment* seg = malloc(sizeof(segment) * INIT_LEN);
+    point head = {start_x, start_y};
+    segment seg = {.head = &head, .length = INIT_LEN, .dir = DOWN};
+    draw_segment(&seg);
 }
 
 
@@ -103,16 +113,19 @@ int main(void)
 {
     reset_flog();
     initscr();
+    curs_set(0);
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
 
     init_game();
+    refresh();
 
     int ch;
     while((ch = getch()) != 'q') {
     }
 
+    curs_set(1);
     endwin();
     return 0;
 }
