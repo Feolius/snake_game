@@ -136,23 +136,31 @@ void draw_segment(WINDOW* win, segment* seg) {
     }
 }
 
-void draw_snake(snake* snake) {}
+void draw_snake(WINDOW* win, snake* snake) {
+    segment *seg = snake->first_seg;
+    while (seg != NULL) {
+        draw_segment(win, seg);
+        seg = seg->prev;
+    }
+}
 
-void game_tick(snake *snake, direction next_dir) {
+void game_tick(game *game, direction next_dir) {
+    snake *snake = game->snake;
     segment* first_seg = snake->first_seg;
     if (next_dir != first_seg->dir) {
         segment* new_first_seg = malloc(sizeof(segment));
         new_first_seg->dir = next_dir;
-        new_first_seg->start = first_seg->start;
+        point* new_start = malloc(sizeof(point));
+        new_start->x = first_seg->start->x;
+        new_start->y = first_seg->start->y;
+        new_first_seg->start = new_start;
         // We are increasing length below. it will be 1.
         new_first_seg->length = 0;
-        new_first_seg->next = first_seg;
-        new_first_seg->prev = NULL;
-        first_seg->prev = new_first_seg;
-        if (snake->last_seg == NULL) {
-            snake->last_seg = first_seg;
-        }
+        new_first_seg->next = NULL;
+        new_first_seg->prev = first_seg;
+        first_seg->next = new_first_seg;
         first_seg = new_first_seg;
+        snake->first_seg = new_first_seg;
         snake->length += 1;
     }
     if (first_seg->dir == UP) {
@@ -168,13 +176,44 @@ void game_tick(snake *snake, direction next_dir) {
     if (snake->length > 1) {
         first_seg->length += 1;
         segment *last_seg = snake->last_seg;
-        snake->last_seg->length -= 1;
+        last_seg->length -= 1;
         if (last_seg->length == 0) {
             snake->length -= 1;
+            snake->last_seg = last_seg->next;
+            last_seg->next->prev = NULL;
             free(last_seg->start);
             free(last_seg);
         }
     }
+}
+
+snake* build_test_snake() {
+    point* start1 = malloc(sizeof(point));
+    start1->x = 25;
+    start1->y = 25;
+    segment* seg1 = malloc(sizeof(segment));
+    seg1->start = start1;
+    seg1->length = 4;
+    seg1->dir = RIGHT;
+    seg1->next = NULL;
+
+    point* start2 = malloc(sizeof(point));
+    start2->x = 21;
+    start2->y = 25;
+    segment* seg2 = malloc(sizeof(segment));
+    seg2->start = start2;
+    seg2->length = 2;
+    seg2->dir = UP;
+    seg2->next = seg1;
+    seg2->prev = NULL;
+
+    seg1->prev = seg2;
+
+    snake *sn = malloc(sizeof(snake));
+    sn->first_seg = seg1;
+    sn->last_seg = seg2;
+    sn->length = 2;
+    return sn;
 }
 
 int main(void)
@@ -184,17 +223,38 @@ int main(void)
     WINDOW* game_win = init_screen();
 
     game* game = init_game(game_win);
-    draw_segment(game_win, game->snake->first_seg);
-    wrefresh(game_win);
+    // snake* sn = build_test_snake();
+    // game->snake = sn;
+    // draw_snake(game_win, sn);
+    // wrefresh(game_win);
     // refresh();
+    // for (int i = 0; i < 6; i++) {
+    //     sleep(2);
+    //     game_tick(game, RIGHT);
+    //     werase(game_win);
+    //     draw_snake(game_win, sn);
+    //     wrefresh(game_win);
+    // }
+
+
 
     while (true) {
-        int ch = getch();
-        // flog("ch: %d", ch);
-        if (ch == 'q') {
-            break;
+        werase(game_win);
+        draw_snake(game_win, game->snake);
+        wrefresh(game_win);
+        const int ch = getch();
+        direction next_dir;
+        if (ch == KEY_UP) {
+            next_dir = UP;
+        } else if (ch == KEY_DOWN) {
+            next_dir = DOWN;
+        } else if (ch == KEY_LEFT) {
+            next_dir = LEFT;
+        } else {
+            next_dir = RIGHT;
         }
         sleep(2);
+        game_tick(game, next_dir);
     }
 
     curs_set(1);
