@@ -105,13 +105,13 @@ game *init_game(WINDOW* win) {
     seg->next = NULL;
     seg->prev = NULL;
 
-    snake *snake = malloc(sizeof(snake));
-    snake->first_seg = seg;
-    snake->last_seg = seg;
-    snake->length = 1;
+    snake *snk = malloc(sizeof(snake));
+    snk->first_seg = seg;
+    snk->last_seg = seg;
+    snk->length = 1;
 
     game *new_game = malloc(sizeof(game));
-    new_game->snake = snake;
+    new_game->snake = snk;
 
     return new_game;
 }
@@ -148,6 +148,8 @@ void game_tick(game *game, direction next_dir) {
     snake *snake = game->snake;
     segment* first_seg = snake->first_seg;
     if (next_dir != first_seg->dir) {
+        flog("dir %d", next_dir);
+        flog("dir %d", next_dir);
         segment* new_first_seg = malloc(sizeof(segment));
         new_first_seg->dir = next_dir;
         point* new_start = malloc(sizeof(point));
@@ -216,6 +218,22 @@ snake* build_test_snake() {
     return sn;
 }
 
+void draw_test_snake(WINDOW *game_win) {
+    game* game = init_game(game_win);
+    snake* sn = build_test_snake();
+    game->snake = sn;
+    draw_snake(game_win, sn);
+    wrefresh(game_win);
+    refresh();
+    for (int i = 0; i < 6; i++) {
+        sleep(2);
+        game_tick(game, RIGHT);
+        werase(game_win);
+        draw_snake(game_win, sn);
+        wrefresh(game_win);
+    }
+}
+
 int main(void)
 {
     reset_flog();
@@ -223,38 +241,29 @@ int main(void)
     WINDOW* game_win = init_screen();
 
     game* game = init_game(game_win);
-    // snake* sn = build_test_snake();
-    // game->snake = sn;
-    // draw_snake(game_win, sn);
-    // wrefresh(game_win);
-    // refresh();
-    // for (int i = 0; i < 6; i++) {
-    //     sleep(2);
-    //     game_tick(game, RIGHT);
-    //     werase(game_win);
-    //     draw_snake(game_win, sn);
-    //     wrefresh(game_win);
-    // }
 
-
+    draw_snake(game_win, game->snake);
+    direction dir = RIGHT;
 
     while (true) {
+        int ch, last = ERR;
+        while ((ch = getch()) != ERR) {
+            last = ch;
+        }
+        if (last == KEY_UP) {
+            dir = UP;
+        } else if (last == KEY_DOWN) {
+            dir = DOWN;
+        } else if (last == KEY_LEFT) {
+            dir = LEFT;
+        } else if (last == KEY_RIGHT) {
+            dir = RIGHT;
+        }
+        game_tick(game, dir);
         werase(game_win);
         draw_snake(game_win, game->snake);
         wrefresh(game_win);
-        const int ch = getch();
-        direction next_dir;
-        if (ch == KEY_UP) {
-            next_dir = UP;
-        } else if (ch == KEY_DOWN) {
-            next_dir = DOWN;
-        } else if (ch == KEY_LEFT) {
-            next_dir = LEFT;
-        } else {
-            next_dir = RIGHT;
-        }
-        sleep(2);
-        game_tick(game, next_dir);
+        sleep(1);
     }
 
     curs_set(1);
