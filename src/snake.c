@@ -4,14 +4,14 @@
 #include <time.h>
 #include "log.h"
 
-point* create_point(int x, int y) {
+point* new_point(int x, int y) {
     point *pnt = malloc(sizeof(point));
     pnt->x = x;
     pnt->y = y;
     return pnt;
 }
 
-segment* create_segment(point *start, int length, direction dir) {
+segment* new_segment(point *start, int length, direction dir) {
     segment *seg = malloc(sizeof(segment));
     seg->start = start;
     seg->length = length;
@@ -80,25 +80,14 @@ game *init_game(int size_x, int size_y) {
     int start_x = size_x / 2;
     int start_y = size_y / 2;
 
-    point *start = malloc(sizeof(point));
-    start->x = start_x;
-    start->y = start_y;
-
-    segment *seg = malloc(sizeof(segment));
-    seg->start = start;
-    seg->length = INIT_LEN;
-    seg->dir = RIGHT;
-    seg->next = NULL;
-    seg->prev = NULL;
+    segment *seg = new_segment(new_point(start_x, start_y), INIT_LEN, RIGHT);
 
     snake *snk = malloc(sizeof(snake));
     snk->first_seg = seg;
     snk->last_seg = seg;
     snk->length = 1;
 
-    point *food = malloc(sizeof(point));
-    food->x = rand() % size_x;
-    food->y = rand() % size_y;
+    point *food = new_point(rand() % size_x, rand() % size_y);
 
     game *g = malloc(sizeof(game));
     g->size_x = size_x;
@@ -114,15 +103,10 @@ void game_tick(game *game, direction next_dir) {
     segment *first_seg = snake->first_seg;
     if (next_dir != first_seg->dir) {
         flog("dir %d", next_dir);
+        point *new_start = new_point(first_seg->start->x, first_seg->start->y);
         segment *new_first_seg = malloc(sizeof(segment));
-        new_first_seg->dir = next_dir;
-        point *new_start = malloc(sizeof(point));
-        new_start->x = first_seg->start->x;
-        new_start->y = first_seg->start->y;
-        new_first_seg->start = new_start;
         // We are increasing length below. it will be 1.
-        new_first_seg->length = 0;
-        new_first_seg->next = NULL;
+        new_first_seg = new_segment(new_start, 0, next_dir);
         new_first_seg->prev = first_seg;
         first_seg->next = new_first_seg;
         first_seg = new_first_seg;
