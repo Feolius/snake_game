@@ -45,6 +45,7 @@ typedef struct {
 // Game logic
 game *init_game(int size_x, int size_y);
 void game_tick(game *game, direction next_dir);
+void generate_food(game *g);
 bool point_belongs_to_segment(point *pnt, segment *seg);
 bool point_belongs_to_snake(point *pnt, snake *snk);
 

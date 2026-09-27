@@ -55,6 +55,11 @@ void draw_snake(WINDOW *win, snake *snk) {
     }
 }
 
+void draw_game(WINDOW *win, game *g) {
+    draw_snake(win, g->snake);
+    mvwaddch(win, g->food->y, g->food->x, '*');
+}
+
 void draw_test_snake(WINDOW *game_win) {
     int max_y, max_x;
     getmaxyx(game_win, max_y, max_x);

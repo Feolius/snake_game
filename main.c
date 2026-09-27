@@ -17,7 +17,7 @@ int main(void) {
 
     game *g = init_game(size_x, size_y);
 
-    draw_snake(game_win, g->snake);
+    draw_game(game_win, g);
     direction dir = RIGHT;
 
     while (true) {
@@ -36,7 +36,7 @@ int main(void) {
         }
         game_tick(g, dir);
         werase(game_win);
-        draw_snake(game_win, g->snake);
+        draw_game(game_win, g);
         wrefresh(game_win);
         sleep(1);
     }

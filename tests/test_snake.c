@@ -101,10 +101,22 @@ void test_point_belongs_to_segment(void) {
     TEST_ASSERT_FALSE_MESSAGE(res, "false: point beyond end (30, 25) segment (25, 25, RIGHT)");
 }
 
+void test_generate_food(void) {
+    game *game = init_game(8, 8);
+    for (int i = 0; i < 20; i++) {
+        point food = *(game->food);
+        char msg[128];
+        snprintf(msg, sizeof(msg), "point (%d, %d)", food.x, food.y);
+        TEST_ASSERT_FALSE_MESSAGE(point_belongs_to_snake(&food, game->snake), msg);
+        generate_food(game);
+    }
+}
+
 
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_game_tick_moves_snake_right);
     RUN_TEST(test_point_belongs_to_segment);
+    RUN_TEST(test_generate_food);
     return UNITY_END();
 }

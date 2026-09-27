@@ -73,6 +73,15 @@ bool point_belongs_to_snake(point *pnt, snake *snk) {
     return false;
 }
 
+void generate_food(game *g) {
+    do {
+        if (g->food != NULL) {
+            free(g->food);
+        }
+        g->food = new_point(rand() % g->size_x, rand() % g->size_y);
+    } while (point_belongs_to_snake(g->food, g->snake));
+}
+
 game *init_game(int size_x, int size_y) {
     flog("init_game");
     srand(time(NULL));
@@ -87,13 +96,12 @@ game *init_game(int size_x, int size_y) {
     snk->last_seg = seg;
     snk->length = 1;
 
-    point *food = new_point(rand() % size_x, rand() % size_y);
-
     game *g = malloc(sizeof(game));
     g->size_x = size_x;
     g->size_y = size_y;
     g->snake = snk;
-    g->food = food;
+    g->food = NULL;
+    generate_food(g);
 
     return g;
 }
