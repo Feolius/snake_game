@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <stdarg.h>
+#include <time.h>
 
 
 #define MAX_WIDTH 50
@@ -37,7 +38,10 @@ typedef struct {
 } snake;
 
 typedef struct {
+    int size_x;
+    int size_y;
     snake* snake;
+    point* food;
 } game;
 
 void reset_flog() {
@@ -84,12 +88,62 @@ WINDOW* init_screen() {
     return game_win;
 }
 
+bool point_belongs_to_segment(point *pnt, segment *seg) {
+    point *start = seg->start;
+    if (start->x != pnt->x && start->y != pnt->y) {
+        return false;
+    }
+    if (start->x == pnt->x) {
+        if (seg->dir == UP || seg->dir == DOWN) {
+            return false;
+        }
+        if (seg->dir == LEFT) {
+            if (pnt->x > start->x || pnt->x < (start->x - (seg->length - 1))) {
+                return false;
+            }
+            return true;
+        }
+        if (pnt->x < start->x || pnt->x > (start->x + (seg->length - 1))) {
+            return false;
+        }
+        return true;
+    }
+    if (start->y == pnt->y) {
+        if (seg->dir == LEFT || seg->dir == RIGHT) {
+            return false;
+        }
+        if (seg->dir == UP) {
+            if (pnt->y > start->y || pnt->y < (start->y - (seg->length - 1))) {
+                return false;
+            }
+            return true;
+        }
+        if (pnt->y < start->y || pnt->y > (start->y + (seg->length - 1))) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool point_belongs_to_snake(point *pnt, snake *snk) {
+    segment *seg = snk->first_seg;
+    do {
+        if (point_belongs_to_segment(pnt, seg)) {
+            return true;
+        }
+        seg = seg->next;
+    } while (seg != NULL);
+    return false;
+}
+
 game *init_game(WINDOW* win) {
+    srand(time(NULL));
     int max_y, max_x;
     getmaxyx(win, max_y, max_x);
 
-    int size_x = (max_x < MAX_WIDTH) ? max_x : MAX_WIDTH;
-    int size_y = (max_y < MAX_HEIGHT) ? max_y : MAX_HEIGHT;
+    int size_x = ((max_x + 1) < MAX_WIDTH) ? (max_x + 1) : MAX_WIDTH;
+    int size_y = ((max_y + 1) < MAX_HEIGHT) ? (max_y + 1) : MAX_HEIGHT;
 
     int start_x = size_x / 2;
     int start_y = size_y / 2;
@@ -111,6 +165,8 @@ game *init_game(WINDOW* win) {
     snk->length = 1;
 
     game *new_game = malloc(sizeof(game));
+    new_game->size_x = size_x;
+    new_game->size_y = size_y;
     new_game->snake = snk;
 
     return new_game;
