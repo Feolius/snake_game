@@ -47,7 +47,7 @@ static void draw_segment(WINDOW *win, segment *seg) {
     }
 }
 
-void draw_snake(WINDOW *win, snake *snk) {
+static void draw_snake(WINDOW *win, snake *snk) {
     segment *seg = snk->first_seg;
     while (seg != NULL) {
         draw_segment(win, seg);

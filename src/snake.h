@@ -3,9 +3,10 @@
 
 #include <stdbool.h>
 
-#define MAX_WIDTH 50
-#define MAX_HEIGHT 50
+#define MAX_WIDTH 20
+#define MAX_HEIGHT 20
 #define INIT_LEN 4
+#define TICK_TIME 500
 
 typedef struct {
     int x;
@@ -45,7 +46,7 @@ typedef struct {
 // Game logic
 game *init_game(int size_x, int size_y);
 void game_tick(game *game, direction next_dir);
-void generate_food(game *g);
+void regenerate_food(game *g);
 bool point_belongs_to_segment(point *pnt, segment *seg);
 bool point_belongs_to_snake(point *pnt, snake *snk);
 

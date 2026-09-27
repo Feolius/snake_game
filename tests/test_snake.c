@@ -108,7 +108,7 @@ void test_generate_food(void) {
         char msg[128];
         snprintf(msg, sizeof(msg), "point (%d, %d)", food.x, food.y);
         TEST_ASSERT_FALSE_MESSAGE(point_belongs_to_snake(&food, game->snake), msg);
-        generate_food(game);
+        regenerate_food(game);
     }
 }
 

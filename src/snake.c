@@ -73,12 +73,12 @@ bool point_belongs_to_snake(point *pnt, snake *snk) {
     return false;
 }
 
-void generate_food(game *g) {
+void regenerate_food(game *g) {
     do {
         if (g->food != NULL) {
             free(g->food);
         }
-        g->food = new_point(rand() % g->size_x, rand() % g->size_y);
+        g->food = new_point(rand() % (g->size_x - 1), rand() % (g->size_y - 1));
     } while (point_belongs_to_snake(g->food, g->snake));
 }
 
@@ -101,7 +101,7 @@ game *init_game(int size_x, int size_y) {
     g->size_y = size_y;
     g->snake = snk;
     g->food = NULL;
-    generate_food(g);
+    regenerate_food(g);
 
     return g;
 }
@@ -129,6 +129,12 @@ void game_tick(game *game, direction next_dir) {
         first_seg->start->x += 1;
     } else {
         first_seg->start->x -= 1;
+    }
+
+    if (first_seg->start->x == game->food->x && first_seg->start->y == game->food->y) {
+        first_seg->length += 1;
+        regenerate_food(game);
+        return;
     }
 
     if (snake->length > 1) {

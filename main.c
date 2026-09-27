@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <ncurses.h>
+#include <time.h>
 
 #include "snake.h"
 #include "render.h"
@@ -7,17 +8,19 @@
 
 int main(void) {
     reset_flog();
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = TICK_TIME * 1000000;
 
     WINDOW *game_win = init_screen();
 
-    int max_y, max_x;
-    getmaxyx(game_win, max_y, max_x);
-    int size_x = ((max_x + 1) < MAX_WIDTH) ? (max_x + 1) : MAX_WIDTH;
-    int size_y = ((max_y + 1) < MAX_HEIGHT) ? (max_y + 1) : MAX_HEIGHT;
+    int size_y, size_x;
+    getmaxyx(game_win, size_y, size_x);
 
     game *g = init_game(size_x, size_y);
 
     draw_game(game_win, g);
+    wrefresh(game_win);
     direction dir = RIGHT;
 
     while (true) {
@@ -38,7 +41,7 @@ int main(void) {
         werase(game_win);
         draw_game(game_win, g);
         wrefresh(game_win);
-        sleep(1);
+        nanosleep(&ts, NULL);
     }
 
     curs_set(1);
