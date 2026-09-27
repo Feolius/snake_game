@@ -29,7 +29,8 @@ target_link_libraries(snake_game PRIVATE snake_render snake_logic)
 # --- Тесты ---
 enable_testing()
 
-add_executable(test_snake tests/test_snake.c)
+add_executable(test_snake tests/test_snake.c
+        tests/point_belongs_to_segment.c)
 target_link_libraries(test_snake PRIVATE snake_logic unity)
 
 add_test(NAME SnakeTests COMMAND test_snake)

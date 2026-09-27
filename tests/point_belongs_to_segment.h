@@ -1,0 +1,7 @@
+
+#ifndef SNAKE_GAME_POINT_BELONGS_TO_SEGMENT_H
+#define SNAKE_GAME_POINT_BELONGS_TO_SEGMENT_H
+
+void test_point_belongs_to_segment(void);
+
+#endif //SNAKE_GAME_POINT_BELONGS_TO_SEGMENT_H

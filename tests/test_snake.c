@@ -1,5 +1,8 @@
+#include <stdlib.h>
+
 #include "unity.h"
 #include "../src/snake.h"
+#include "point_belongs_to_segment.h"
 
 void setUp(void) {}
 void tearDown(void) {}
@@ -13,10 +16,10 @@ void test_game_tick_moves_snake_right(void) {
     TEST_ASSERT_EQUAL_INT(old_x + 1, g->snake->first_seg->start->x);
 }
 
-void test_
 
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_game_tick_moves_snake_right);
+    RUN_TEST(test_point_belongs_to_segment);
     return UNITY_END();
 }

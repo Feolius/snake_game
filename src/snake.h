@@ -48,6 +48,9 @@ void game_tick(game *game, direction next_dir);
 bool point_belongs_to_segment(point *pnt, segment *seg);
 bool point_belongs_to_snake(point *pnt, snake *snk);
 
+point* create_point(int x, int y);
+segment* create_segment(point* start, int length, direction dir);
+
 // Test helpers
 snake *build_test_snake(void);
 

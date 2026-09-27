@@ -4,27 +4,32 @@
 #include <time.h>
 #include "log.h"
 
+point* create_point(int x, int y) {
+    point *pnt = malloc(sizeof(point));
+    pnt->x = x;
+    pnt->y = y;
+    return pnt;
+}
+
+segment* create_segment(point *start, int length, direction dir) {
+    segment *seg = malloc(sizeof(segment));
+    seg->start = start;
+    seg->length = length;
+    seg->dir = dir;
+    seg->next = NULL;
+    seg->prev = NULL;
+    return seg;
+}
+
 bool point_belongs_to_segment(point *pnt, segment *seg) {
     point *start = seg->start;
     if (start->x != pnt->x && start->y != pnt->y) {
         return false;
     }
-    if (start->x == pnt->x) {
-        if (seg->dir == UP || seg->dir == DOWN) {
-            return false;
-        }
-        if (seg->dir == LEFT) {
-            if (pnt->x > start->x || pnt->x < (start->x - (seg->length - 1))) {
-                return false;
-            }
-            return true;
-        }
-        if (pnt->x < start->x || pnt->x > (start->x + (seg->length - 1))) {
-            return false;
-        }
+    if (start->x == pnt->x && start->y == pnt->y) {
         return true;
     }
-    if (start->y == pnt->y) {
+    if (start->x == pnt->x) {
         if (seg->dir == LEFT || seg->dir == RIGHT) {
             return false;
         }
@@ -35,6 +40,21 @@ bool point_belongs_to_segment(point *pnt, segment *seg) {
             return true;
         }
         if (pnt->y < start->y || pnt->y > (start->y + (seg->length - 1))) {
+            return false;
+        }
+        return true;
+    }
+    if (start->y == pnt->y) {
+        if (seg->dir == UP || seg->dir == DOWN) {
+            return false;
+        }
+        if (seg->dir == LEFT) {
+            if (pnt->x > start->x || pnt->x < (start->x - (seg->length - 1))) {
+                return false;
+            }
+            return true;
+        }
+        if (pnt->x < start->x || pnt->x > (start->x + (seg->length - 1))) {
             return false;
         }
         return true;
