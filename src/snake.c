@@ -1,27 +1,8 @@
 #include "snake.h"
 
 #include <stdlib.h>
-#include <stdarg.h>
 #include <time.h>
-#include <stdio.h>
-
-void reset_flog(void) {
-    FILE *fp = fopen("log.txt", "w");
-    fclose(fp);
-}
-
-void flog(const char *fmt, ...) {
-    FILE *fp = fopen("log.txt", "a");
-    if (!fp) return;
-
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(fp, fmt, args);
-    va_end(args);
-
-    fputc('\n', fp);
-    fclose(fp);
-}
+#include "log.h"
 
 bool point_belongs_to_segment(point *pnt, segment *seg) {
     point *start = seg->start;
@@ -73,6 +54,7 @@ bool point_belongs_to_snake(point *pnt, snake *snk) {
 }
 
 game *init_game(int size_x, int size_y) {
+    flog("init_game");
     srand(time(NULL));
 
     int start_x = size_x / 2;

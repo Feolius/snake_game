@@ -42,10 +42,6 @@ typedef struct {
     point* food;
 } game;
 
-// Logging
-void reset_flog(void);
-void flog(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-
 // Game logic
 game *init_game(int size_x, int size_y);
 void game_tick(game *game, direction next_dir);

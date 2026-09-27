@@ -2,8 +2,10 @@
 #include "snake.h"
 
 #include <unistd.h>
+#include <log.h>
 
 WINDOW *init_screen(void) {
+    flog("init_screen");
     initscr();
     curs_set(0);
     cbreak();

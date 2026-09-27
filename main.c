@@ -3,6 +3,7 @@
 
 #include "snake.h"
 #include "render.h"
+#include "log.h"
 
 int main(void) {
     reset_flog();

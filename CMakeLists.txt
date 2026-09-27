@@ -11,7 +11,8 @@ add_library(unity STATIC vendor/unity/unity.c)
 target_include_directories(unity PUBLIC vendor/unity)
 
 # --- Чистая логика игры (без ncurses) ---
-add_library(snake_logic STATIC src/snake.c)
+add_library(snake_logic STATIC src/snake.c
+        src/log.c)
 target_include_directories(snake_logic PUBLIC src)
 
 # --- Рендер (с ncurses) ---
