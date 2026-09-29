@@ -34,12 +34,12 @@ bool point_belongs_to_segment(point *pnt, segment *seg) {
             return false;
         }
         if (seg->dir == UP) {
-            if (pnt->y > start->y || pnt->y < (start->y - (seg->length - 1))) {
+            if (pnt->y < start->y || pnt->y > (start->y + (seg->length - 1))) {
                 return false;
             }
             return true;
         }
-        if (pnt->y < start->y || pnt->y > (start->y + (seg->length - 1))) {
+        if (pnt->y < (start->y - (seg->length - 1)) || pnt->y > start->y) {
             return false;
         }
         return true;
@@ -49,12 +49,12 @@ bool point_belongs_to_segment(point *pnt, segment *seg) {
             return false;
         }
         if (seg->dir == LEFT) {
-            if (pnt->x > start->x || pnt->x < (start->x - (seg->length - 1))) {
+            if (pnt->x < start->x || pnt->x > (start->x + (seg->length - 1))) {
                 return false;
             }
             return true;
         }
-        if (pnt->x < start->x || pnt->x > (start->x + (seg->length - 1))) {
+        if (pnt->x < (start->x - (seg->length - 1)) || pnt->x > start->x) {
             return false;
         }
         return true;
@@ -68,7 +68,7 @@ bool point_belongs_to_snake(point *pnt, snake *snk) {
         if (point_belongs_to_segment(pnt, seg)) {
             return true;
         }
-        seg = seg->next;
+        seg = seg->prev;
     } while (seg != NULL);
     return false;
 }
@@ -99,8 +99,10 @@ game *init_game(int size_x, int size_y) {
     game *g = malloc(sizeof(game));
     g->size_x = size_x;
     g->size_y = size_y;
+    g->score = 0;
     g->snake = snk;
     g->food = NULL;
+    g->loose = false;
     regenerate_food(g);
 
     return g;
@@ -121,18 +123,31 @@ void game_tick(game *game, direction next_dir) {
         snake->first_seg = new_first_seg;
         snake->length += 1;
     }
+
+    point* next_start = new_point(first_seg->start->x, first_seg->start->y);
     if (first_seg->dir == UP) {
-        first_seg->start->y -= 1;
+        next_start->y -= 1;
     } else if (first_seg->dir == DOWN) {
-        first_seg->start->y += 1;
+        next_start->y += 1;
     } else if (first_seg->dir == RIGHT) {
-        first_seg->start->x += 1;
+        next_start->x += 1;
     } else {
-        first_seg->start->x -= 1;
+        next_start->x -= 1;
     }
+
+    if (next_start->x == -1 || next_start->x == game->size_x ||
+        next_start->y == -1 || next_start->y == game->size_y ||
+        point_belongs_to_snake(next_start, game->snake)) {
+        game->loose = true;
+        return;
+    }
+
+    free(first_seg->start);
+    first_seg->start = next_start;
 
     if (first_seg->start->x == game->food->x && first_seg->start->y == game->food->y) {
         first_seg->length += 1;
+        game->score += 1;
         regenerate_food(game);
         return;
     }
@@ -151,31 +166,27 @@ void game_tick(game *game, direction next_dir) {
     }
 }
 
-snake *build_test_snake(void) {
-    point *start1 = malloc(sizeof(point));
-    start1->x = 25;
-    start1->y = 25;
-    segment *seg1 = malloc(sizeof(segment));
-    seg1->start = start1;
-    seg1->length = 4;
-    seg1->dir = RIGHT;
-    seg1->next = NULL;
+snake *build_test_snake(int size_x, int size_y) {
+    int start_x = size_x / 2;
+    int start_y = size_y / 2;
 
-    point *start2 = malloc(sizeof(point));
-    start2->x = 21;
-    start2->y = 25;
-    segment *seg2 = malloc(sizeof(segment));
-    seg2->start = start2;
-    seg2->length = 2;
-    seg2->dir = UP;
+    segment *seg1 = new_segment(new_point(start_x, start_y), 1, RIGHT);
+
+    segment *seg2 = new_segment(new_point(start_x - 1, start_y), 1, DOWN);
     seg2->next = seg1;
-    seg2->prev = NULL;
-
     seg1->prev = seg2;
+
+    segment *seg3 = new_segment(new_point(start_x - 1, start_y - 1), 2, LEFT);
+    seg3->next = seg2;
+    seg2->prev = seg3;
+
+    segment *seg4 = new_segment(new_point(start_x + 1, start_y - 1), 5, UP);
+    seg4->next = seg3;
+    seg3->prev = seg4;
 
     snake *sn = malloc(sizeof(snake));
     sn->first_seg = seg1;
-    sn->last_seg = seg2;
-    sn->length = 2;
+    sn->last_seg = seg4;
+    sn->length = 4;
     return sn;
 }

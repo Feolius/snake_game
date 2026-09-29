@@ -3,8 +3,9 @@
 
 #include <unistd.h>
 #include <log.h>
+#include <stdlib.h>
 
-WINDOW *init_screen(void) {
+game_screen *init_screen(void) {
     flog("init_screen");
     initscr();
     curs_set(0);
@@ -19,12 +20,16 @@ WINDOW *init_screen(void) {
     int size_x = (max_x < MAX_WIDTH) ? max_x : MAX_WIDTH;
     int size_y = (max_y < MAX_HEIGHT) ? max_y : MAX_HEIGHT;
 
-    WINDOW *borders_win = newwin(size_y, size_x, 0, 0);
-    WINDOW *game_win = newwin(size_y - 2, size_x - 2, 1, 1);
+    WINDOW *score_win = newwin(1, size_x, 0, 0);
+    WINDOW *borders_win = newwin(size_y - 1, size_x, 1, 0);
+    WINDOW *game_win = newwin(size_y - 3, size_x - 2, 2, 1);
     refresh();
     box(borders_win, 0, 0);
     wrefresh(borders_win);
-    return game_win;
+    game_screen *display = malloc(sizeof(game_screen));
+    display->game_window = game_win;
+    display->score_window = score_win;
+    return display;
 }
 
 static void draw_segment(WINDOW *win, segment *seg) {
@@ -56,8 +61,20 @@ static void draw_snake(WINDOW *win, snake *snk) {
 }
 
 void draw_game(WINDOW *win, game *g) {
+    werase(win);
     draw_snake(win, g->snake);
     mvwaddch(win, g->food->y, g->food->x, '*');
+    wrefresh(win);
+}
+
+void draw_score(WINDOW *win, game *g) {
+    werase(win);
+    if (g->loose) {
+        wprintw(win, "Game Over!");
+    } else {
+        wprintw(win, "Score: %d", g->score);
+    }
+    wrefresh(win);
 }
 
 void draw_test_snake(WINDOW *game_win) {
@@ -67,7 +84,7 @@ void draw_test_snake(WINDOW *game_win) {
     int size_y = ((max_y + 1) < MAX_HEIGHT) ? (max_y + 1) : MAX_HEIGHT;
 
     game *g = init_game(size_x, size_y);
-    snake *sn = build_test_snake();
+    snake *sn = build_test_snake(size_x, size_y);
     g->snake = sn;
     draw_snake(game_win, sn);
     wrefresh(game_win);

@@ -39,11 +39,12 @@ typedef struct {
 typedef struct {
     int size_x;
     int size_y;
+    int score;
     snake* snake;
     point* food;
+    bool loose;
 } game;
 
-// Game logic
 game *init_game(int size_x, int size_y);
 void game_tick(game *game, direction next_dir);
 void regenerate_food(game *g);
@@ -53,7 +54,6 @@ bool point_belongs_to_snake(point *pnt, snake *snk);
 point* new_point(int x, int y);
 segment* new_segment(point* start, int length, direction dir);
 
-// Test helpers
-snake *build_test_snake(void);
+snake *build_test_snake(int size_x, int size_y);
 
 #endif // SNAKE_H
