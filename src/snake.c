@@ -135,9 +135,8 @@ void game_tick(game *game, direction next_dir) {
     if (next_dir != first_seg->dir) {
         flog("dir %d", next_dir);
         point *new_start = new_point(first_seg->start->x, first_seg->start->y);
-        segment *new_first_seg = malloc(sizeof(segment));
         // We are increasing length below. it will be 1.
-        new_first_seg = new_segment(new_start, 0, next_dir);
+        segment *new_first_seg = new_segment(new_start, 0, next_dir);
         new_first_seg->prev = first_seg;
         first_seg->next = new_first_seg;
         first_seg = new_first_seg;
