@@ -82,6 +82,27 @@ void regenerate_food(game *g) {
     } while (point_belongs_to_snake(g->food, g->snake));
 }
 
+
+static bool point_is_tail(point *pnt, snake *snk) {
+    segment *last = snk->last_seg;
+    point tail;
+    if (last->dir == UP) {
+        tail.x = last->start->x;
+        tail.y = last->start->y + (last->length - 1);
+    } else if (last->dir == DOWN) {
+        tail.x = last->start->x;
+        tail.y = last->start->y - (last->length - 1);
+    } else if (last->dir == RIGHT) {
+        tail.x = last->start->x - (last->length - 1);
+        tail.y = last->start->y;
+    } else {
+        tail.x = last->start->x + (last->length - 1);
+        tail.y = last->start->y;
+    }
+    return pnt->x == tail.x && pnt->y == tail.y;
+
+}
+
 game *init_game(int size_x, int size_y) {
     flog("init_game");
     srand(time(NULL));
@@ -109,8 +130,8 @@ game *init_game(int size_x, int size_y) {
 }
 
 void game_tick(game *game, direction next_dir) {
-    snake *snake = game->snake;
-    segment *first_seg = snake->first_seg;
+    snake *snk = game->snake;
+    segment *first_seg = snk->first_seg;
     if (next_dir != first_seg->dir) {
         flog("dir %d", next_dir);
         point *new_start = new_point(first_seg->start->x, first_seg->start->y);
@@ -120,8 +141,8 @@ void game_tick(game *game, direction next_dir) {
         new_first_seg->prev = first_seg;
         first_seg->next = new_first_seg;
         first_seg = new_first_seg;
-        snake->first_seg = new_first_seg;
-        snake->length += 1;
+        snk->first_seg = new_first_seg;
+        snk->length += 1;
     }
 
     point* next_start = new_point(first_seg->start->x, first_seg->start->y);
@@ -135,9 +156,15 @@ void game_tick(game *game, direction next_dir) {
         next_start->x -= 1;
     }
 
+    // Boundaries check
     if (next_start->x == -1 || next_start->x == game->size_x ||
-        next_start->y == -1 || next_start->y == game->size_y ||
-        point_belongs_to_snake(next_start, game->snake)) {
+        next_start->y == -1 || next_start->y == game->size_y) {
+        game->loose = true;
+        return;
+    }
+
+    // Self damage
+    if (point_belongs_to_snake(next_start, game->snake) && !point_is_tail(next_start, game->snake)) {
         game->loose = true;
         return;
     }
@@ -152,13 +179,13 @@ void game_tick(game *game, direction next_dir) {
         return;
     }
 
-    if (snake->length > 1) {
+    if (snk->length > 1) {
         first_seg->length += 1;
-        segment *last_seg = snake->last_seg;
+        segment *last_seg = snk->last_seg;
         last_seg->length -= 1;
         if (last_seg->length == 0) {
-            snake->length -= 1;
-            snake->last_seg = last_seg->next;
+            snk->length -= 1;
+            snk->last_seg = last_seg->next;
             last_seg->next->prev = NULL;
             free(last_seg->start);
             free(last_seg);
